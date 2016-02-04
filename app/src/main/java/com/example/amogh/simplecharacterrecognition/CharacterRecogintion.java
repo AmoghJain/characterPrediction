@@ -1,8 +1,9 @@
 package com.example.amogh.simplecharacterrecognition;
 
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -10,7 +11,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.graphics.Bitmap;
 import android.widget.Toast;
 
 public class CharacterRecogintion extends AppCompatActivity {
@@ -34,6 +34,7 @@ public class CharacterRecogintion extends AppCompatActivity {
         mChar        = (TextView) findViewById(R.id.oChar);
         mStrokeWidth = (SeekBar) findViewById(R.id.seekBar);
         testImage    = (ImageView) findViewById(R.id.testImage);
+
         mClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -46,32 +47,16 @@ public class CharacterRecogintion extends AppCompatActivity {
         mPredict.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                btmap=mWipe.returnValidBitmap();
+            btmap=mWipe.returnValidBitmap();
+            PredictionTask ptask = new PredictionTask();
+            ptask.execute(new Bitmap[]{btmap});
 
-            if(processedBitmap==null)
-            {
-                return;
-            }
+//            if(processedBitmap==null)
+//            {
+//                return;
+//            }
 
-                new AsyncTask<Bitmap, Void, String>(){
-                    @Override
-                    protected void onPreExecute() {
 
-                    }
-
-                    @Override
-                    protected String doInBackground(Bitmap... bitmaps) {
-                        synchronized (mPredict) {
-                            String tag = MxNetUtils.identifyChar(btmap,testImage);
-                            Toast.makeText(CharacterRecogintion.this, "Done predicting", Toast.LENGTH_SHORT).show();
-                            return tag;
-                        }
-                    }
-                    @Override
-                    protected void onPostExecute(String tag) {
-                        mChar.setText(tag);
-                    }
-                }.execute(btmap);
             }
         });
 
@@ -118,4 +103,21 @@ public class CharacterRecogintion extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+    private class PredictionTask extends AsyncTask<Bitmap, Void, Bitmap> {
+        @Override
+        protected Bitmap doInBackground(Bitmap... bmps) {
+            return MxNetUtils.identifyChar(bmps[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap result) {
+            Toast.makeText(getApplicationContext(), "Done predicting", Toast.LENGTH_SHORT).show();
+            testImage.setImageBitmap(result);
+//            mChar.setText(result);
+        }
+    }
+
+
 }
