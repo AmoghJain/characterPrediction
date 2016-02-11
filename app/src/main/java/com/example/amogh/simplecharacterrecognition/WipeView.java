@@ -11,12 +11,15 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class WipeView extends View {
 
@@ -27,11 +30,19 @@ public class WipeView extends View {
     private Context mContext;
     private float totalPathLength = 0;
     private long timestamp = System.nanoTime();
+    private Timer timer;
+    private TimerTask timerTask;
+    private ResultListener rListener;
 
     public WipeView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
         setupDrawing();
+        //this.setOnResultListener(new ResultListener());
+    }
+
+    public void setTextListener(ResultListener rlistener){
+        this.rListener = rlistener;
     }
 
 
@@ -47,6 +58,18 @@ public class WipeView extends View {
         drawPaint.setStrokeJoin(Paint.Join.ROUND);
         drawPaint.setStrokeCap(Paint.Cap.ROUND);
         canvasPaint = new Paint(Paint.DITHER_FLAG);
+        setupTimerTask();
+    }
+
+    private void setupTimerTask() {
+        timer = new Timer();
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                PredictionTask ptask = new PredictionTask();
+                ptask.execute(canvasBitmap);
+            }
+        };
     }
 
     @Override
@@ -73,7 +96,9 @@ public class WipeView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 drawPath.moveTo(touchX, touchY);
-                break;
+                timer.cancel();
+                timer.purge();
+            break;
             case MotionEvent.ACTION_MOVE:
                 drawPath.lineTo(touchX, touchY);
                 break;
@@ -83,6 +108,10 @@ public class WipeView extends View {
                 pm.setPath(drawPath, false);
                 totalPathLength += pm.getLength();
                 drawPath.reset();
+                setupTimerTask();
+                timer.schedule(timerTask, 500);
+
+
 //                startNew();
                 break;
             default:
@@ -94,13 +123,12 @@ public class WipeView extends View {
 
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    public void startNew(TextView tv) {
+    public void startNew() {
         drawCanvas.drawColor(Color.WHITE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             this.setBackground(null);
         }
         totalPathLength = 0;
-        tv.setText("");
         invalidate();
     }
 
@@ -116,6 +144,30 @@ public class WipeView extends View {
     public void changeStrokeWidth(int seekProgress)
     {
         drawPaint.setStrokeWidth(10 + seekProgress);
+    }
+
+    private class PredictionTask extends AsyncTask<Bitmap, Void, String> {
+        @Override
+        protected String doInBackground(Bitmap... bmps) {
+            Predictor predictor = new Predictor(bmps[0]);
+            return predictor.predict();
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+//            Toast.makeText(getApplicationContext(), "Done predicting", Toast.LENGTH_SHORT).show();
+//            testImage.setImageBitmap(result);
+//            mChar.setText(result);
+            if (rListener!=null){
+                rListener.setText(result);
+                timer.cancel();
+                timer.purge();
+                Bitmap bmp = canvasBitmap.copy(Bitmap.Config.ARGB_8888, false);
+                rListener.setPreviousChar(bmp);
+                startNew();
+            }
+
+        }
     }
 
 }

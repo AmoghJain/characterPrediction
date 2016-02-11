@@ -23,6 +23,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="#FFFFFFFF" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/previousChar"
+                android:layout_gravity="left|center_vertical"
+                android:maxHeight="80dp"
+                android:maxWidth="100dp"
+                android:minHeight="80dp"
+                android:minWidth="100dp"
+                android:alpha="0.5"
+                android:scaleType="centerInside"
+                android:adjustViewBounds="true"/>
         </FrameLayout>
 
         <LinearLayout
@@ -30,7 +43,6 @@
             android:layout_height="0dp"
             android:layout_weight="2"
             android:weightSum="9">
-            <Button
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="4"
@@ -40,7 +52,7 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="2"
+                android:layout_weight="5"
                 android:id="@+id/oChar"
                 android:text=""
                 android:textSize="40sp"
@@ -51,7 +63,7 @@
             <Button
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="3"
+                android:layout_weight="4"
                 android:text="Clear"
                 android:textSize="20sp"
                 android:id="@+id/clear"/>

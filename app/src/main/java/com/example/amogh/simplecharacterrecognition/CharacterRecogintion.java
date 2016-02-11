@@ -3,6 +3,7 @@ package com.example.amogh.simplecharacterrecognition;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -35,7 +36,7 @@ public class CharacterRecogintion extends AppCompatActivity {
     private SeekBar mStrokeWidth;
     private Bitmap btmap;
     private Bitmap processedBitmap;
-    private ImageView testImage;
+    private ImageView mPreviousChar;
     private AssetManager assetManager;
     private final String TAG = "CharacaterRecognition";
 
@@ -56,26 +57,19 @@ public class CharacterRecogintion extends AppCompatActivity {
         setContentView(R.layout.activity_character_recogintion);
 
         mWipe        = (WipeView) findViewById(R.id.mainCanvas);
-        mPredict     = (Button) findViewById(R.id.predict);
+//        mPredict     = (Button) findViewById(R.id.predict);
         mClear       = (Button) findViewById(R.id.clear);
         mChar        = (TextView) findViewById(R.id.oChar);
         mStrokeWidth = (SeekBar) findViewById(R.id.seekBar);
+        mPreviousChar = (ImageView) findViewById(R.id.previousChar);
 
         mClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mWipe.startNew(mChar);
+                mWipe.startNew();
+                mChar.setText("");
+                mPreviousChar.setImageBitmap(null);
 
-
-            }
-        });
-
-        mPredict.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            btmap=mWipe.returnValidBitmap();
-            PredictionTask ptask = new PredictionTask();
-            ptask.execute(new Bitmap[]{btmap});
             }
         });
 
@@ -110,23 +104,19 @@ public class CharacterRecogintion extends AppCompatActivity {
         }
         neuralInit(path + "/hindi-weights");
 
+        mWipe.setTextListener(new ResultListener() {
+            @Override
+            public void setText(String text) {
+                mChar.setText(mChar.getText() + text);
+            }
 
+            @Override
+            public void setPreviousChar(Bitmap bmp) {
+                mPreviousChar.setImageBitmap(bmp);
+            }
+        });
     }
 
-    private class PredictionTask extends AsyncTask<Bitmap, Void, String> {
-        @Override
-        protected String doInBackground(Bitmap... bmps) {
-            Predictor predictor = new Predictor(bmps[0]);
-            return predictor.predict();
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-//            Toast.makeText(getApplicationContext(), "Done predicting", Toast.LENGTH_SHORT).show();
-//            testImage.setImageBitmap(result);
-            mChar.setText(result);
-        }
-    }
 
     /** Finds the proper location on the SD card where we can save files. */
     public File getStorageDirectory(Context ctx) {
@@ -163,6 +153,11 @@ public class CharacterRecogintion extends AppCompatActivity {
         return null;
     }
 
+//    @Override
+//    public void setText(String text) {
+//        mChar.setText(text);
+//    }
+
     private class unpackDataTask extends AsyncTask<String, Void, Void> {
 
         @Override
@@ -171,6 +166,8 @@ public class CharacterRecogintion extends AppCompatActivity {
             return null;
         }
     }
+
+
 
     private boolean unpackZip(String zipfilename, String path)
     {
@@ -224,6 +221,8 @@ public class CharacterRecogintion extends AppCompatActivity {
 //        Toast.makeText(this, "All good", Toast.LENGTH_LONG).show();
         return true;
     }
+
+
 
 
 
