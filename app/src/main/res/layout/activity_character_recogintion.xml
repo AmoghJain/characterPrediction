@@ -14,7 +14,7 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="8"
+            android:layout_weight="16"
             >
 
             <com.example.amogh.simplecharacterrecognition.WipeView
@@ -44,7 +44,9 @@
                 android:id="@+id/oChar"
                 android:text=""
                 android:textSize="40sp"
-                android:textAlignment="gravity"/>
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:textAlignment="center"/>
 
             <Button
                 android:layout_width="0dp"
@@ -87,12 +89,7 @@
                 </LinearLayout>
 
                 </LinearLayout>
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="8"
-            android:id="@+id/testImage"/>
-        </LinearLayout>
+    </LinearLayout>
 
 
 
